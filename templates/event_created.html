@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Event Created - Event Today{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+  <div class="card shadow p-4 text-center mx-auto" style="max-width: 500px;">
+    <h3 class="mb-3 text-success">✅ Event Created Successfully!</h3>
+    <h5 class="text-primary">{{ event_name }}</h5>
+    <p class="text-muted mb-4">Your event has been created successfully.</p>
+
+    <!-- Event URL -->
+    <div class="alert alert-info text-truncate" style="overflow-x: auto;">
+      <strong>Share this URL:</strong><br>
+      <code id="eventURL">{{ request.host_url.rstrip('/') }}{{ event_url }}</code>
+    </div>
+    <button type="button" class="btn btn-outline-primary mb-3 w-100" onclick="copyURL()">Copy URL</button>
+
+    <!-- QR Code -->
+    {% if qr_url %}
+    <div class="mb-3">
+      <h6 class="text-secondary mb-2">Scan or Download QR Code:</h6>
+      <img src="{{ qr_url }}" alt="QR Code" class="img-fluid border p-2 rounded mb-2" style="max-width: 220px;">
+      <div>
+        <a href="{{ qr_url }}" download class="btn btn-success btn-sm">Download QR Code</a>
+      </div>
+    </div>
+    {% endif %}
+
+    <a href="{{ url_for('dashboard') }}" class="btn btn-primary w-100 mt-3">Back to Dashboard</a>
+  </div>
+</div>
+
+<script>
+async function copyURL() {
+  const el = document.getElementById("eventURL");
+  if (!el) return alert("No URL element found.");
+
+  const textToCopy = el.innerText.trim();
+
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(textToCopy);
+      return showCopyFeedback("✅ Event URL copied to clipboard!");
+    }
+  } catch (err) {
+    console.warn("navigator.clipboard failed:", err);
+  }
+
+  try {
+    const textarea = document.createElement("textarea");
+    textarea.value = textToCopy;
+    textarea.style.position = "fixed";
+    textarea.style.left = "-9999px";
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(textarea);
+    if (ok) showCopyFeedback("✅ Event URL copied to clipboard (fallback)!");
+    else throw new Error("execCommand returned false");
+  } catch (err) {
+    console.error("Fallback copy failed:", err);
+    alert("⚠️ Failed to copy URL. Please copy manually.");
+  }
+}
+
+function showCopyFeedback(msg) {
+  alert(msg);
+}
+</script>
+{% endblock %}

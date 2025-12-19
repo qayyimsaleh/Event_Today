@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Event - Event Today{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="card shadow p-4 mx-auto" style="max-width: 600px;">
+    <h3 class="mb-4 text-center text-primary">Edit Event</h3>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="alert alert-success text-center">
+          {{ messages[0] }}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+      <div class="mb-3">
+        <label class="form-label">Event Name</label>
+        <input name="event_name" class="form-control" value="{{ event.EventName }}" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Description</label>
+        <textarea name="description" class="form-control" rows="3" required>{{ event.Description }}</textarea>
+      </div>
+
+      <div class="row">
+        <div class="col-12 col-md-6 mb-3">
+          <label class="form-label">Start Time</label>
+          <input type="datetime-local" name="start_time" class="form-control"
+                 value="{% if event.StartTime %}{{ event.StartTime.strftime('%Y-%m-%dT%H:%M') }}{% endif %}"
+                 required>
+        </div>
+        <div class="col-12 col-md-6 mb-3">
+          <label class="form-label">End Time</label>
+          <input type="datetime-local" name="end_time" class="form-control"
+                 value="{% if event.EndTime %}{{ event.EndTime.strftime('%Y-%m-%dT%H:%M') }}{% endif %}"
+                 required>
+        </div>
+      </div>
+
+      <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary w-100 w-md-auto">Cancel</a>
+        <button type="submit" class="btn btn-success w-100 w-md-auto">Update Event</button>
+      </div>
+    </form>
+
+    <hr class="my-4">
+
+    <!-- Event URL & QR Section -->
+    <div class="text-center">
+      <h5 class="text-secondary mb-2">Event URL</h5>
+      <div class="alert alert-info text-truncate" style="overflow-x: auto;">
+        <code id="eventURL">{{ request.host_url.rstrip('/') }}{{ event.URL }}</code>
+      </div>
+      <button type="button" class="btn btn-outline-primary mb-3" onclick="copyURL()">Copy URL</button>
+
+      {% if qr_url %}
+      <div class="mt-3">
+        <h5 class="text-secondary mb-2">Event QR Code</h5>
+        <img src="{{ qr_url }}" alt="Event QR Code" class="img-fluid border p-2 rounded mb-2" style="max-width: 220px;">
+        <div>
+          <a href="{{ qr_url }}" download class="btn btn-success btn-sm">Download QR Code</a>
+        </div>
+      </div>
+      {% else %}
+      <div class="alert alert-warning mt-3">⚠️ QR code not found for this event.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+async function copyURL() {
+  const el = document.getElementById("eventURL");
+  if (!el) return alert("No URL element found.");
+
+  const textToCopy = el.innerText.trim();
+
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(textToCopy);
+      return showCopyFeedback("✅ Event URL copied to clipboard!");
+    }
+  } catch (err) {
+    console.warn("navigator.clipboard failed:", err);
+  }
+
+  try {
+    const textarea = document.createElement("textarea");
+    textarea.value = textToCopy;
+    textarea.style.position = "fixed";
+    textarea.style.left = "-9999px";
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(textarea);
+    if (ok) showCopyFeedback("✅ Event URL copied to clipboard (fallback)!");
+    else throw new Error("execCommand returned false");
+  } catch (err) {
+    console.error("Fallback copy failed:", err);
+    alert("⚠️ Failed to copy URL. Please copy manually.");
+  }
+}
+
+function showCopyFeedback(msg) {
+  alert(msg);
+}
+</script>
+{% endblock %}
