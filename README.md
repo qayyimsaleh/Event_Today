@@ -130,6 +130,4 @@ eventtoday/
 | GET    | `/event/<event_id>/submissions`    | Get submissions as JSON      | Yes           |
 | GET/POST | `/event/<event_url>`             | Public attendance form       | No            |
 
-## License
 
-This project is for internal/organizational use. Add a license file as appropriate.
