@@ -1,0 +1,6 @@
+flask>=3.0
+flask-wtf>=1.2
+flask-limiter>=3.5
+pyodbc>=5.1
+qrcode[pil]>=7.4
+python-dotenv>=1.0
